@@ -3,9 +3,6 @@ name: Kickbase Budget Check
 on:
   # Run multiple times for budget monitoring (times in UTC, but runner uses Berlin timezone)
   schedule:
-    # Test runs (you can remove these after testing)
-    - cron: "*/5 * * * *" # Every 5 minutes for testing (REMOVE AFTER TESTING)
-
     # Production schedule
     - cron: "0 15 * * 5" # Friday at 17:00 Berlin time
     - cron: "0 16 * * 5" # Friday at 18:00 Berlin time
