@@ -1,0 +1,55 @@
+name: Kickbase Budget Check
+
+on:
+  # Run multiple times for budget monitoring (times in UTC, but runner uses Berlin timezone)
+  schedule:
+    # Test runs (you can remove these after testing)
+    - cron: "*/5 * * * *" # Every 5 minutes for testing (REMOVE AFTER TESTING)
+
+    # Production schedule
+    - cron: "0 15 * * 5" # Friday at 17:00 Berlin time
+    - cron: "0 16 * * 5" # Friday at 18:00 Berlin time
+    - cron: "30 16 * * 5" # Friday at 18:30 Berlin time
+    - cron: "15 17 * * 5" # Friday at 19:15 Berlin time
+
+  # Allow manual triggering for testing
+  workflow_dispatch:
+
+jobs:
+  budget-check:
+    runs-on: ubuntu-latest
+
+    # Set timezone to Berlin
+    env:
+      TZ: Europe/Berlin
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run budget check
+        env:
+          # Twilio Configuration
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_WHATSAPP_NUMBER: ${{ secrets.TWILIO_WHATSAPP_NUMBER }}
+          YOUR_PHONE_NUMBER: ${{ secrets.YOUR_PHONE_NUMBER }}
+          CONTENT_SID: ${{ secrets.CONTENT_SID }}
+
+          # Kickbase Configuration
+          KICKBASE_EMAIL: ${{ secrets.KICKBASE_EMAIL }}
+          KICKBASE_PASSWORD: ${{ secrets.KICKBASE_PASSWORD }}
+          KICKBASE_API_BASE: https://api.kickbase.com
+        run: npm start
+
+      - name: Log completion
+        run: echo "Budget check completed at $(date)"
