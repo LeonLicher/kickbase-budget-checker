@@ -1,14 +1,12 @@
 services:
-  - type: cron
-    name: kickbase-budget-check
+  - type: web
+    name: kickbase-budget-checker
     runtime: node
-    plan: starter
-    # Render allows one schedule per cron service and always uses UTC.
-    # This is every 30 min on Friday 17:00-19:30 Berlin time (summer / CEST),
-    # ahead of the 20:30 deadline. In winter (CET) it shifts an hour earlier.
-    schedule: "0,30 15-17 * * 5"
+    plan: free
     buildCommand: npm ci
     startCommand: npm start
+    # Render's own health check keeps hitting this, and it never does work.
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_VERSION
         value: "24"
@@ -19,3 +17,15 @@ services:
         sync: false
       - key: NTFY_TOPIC
         sync: false
+      - key: TRIGGER_SECRET
+        generateValue: true
+      # When the check runs. Times are local to CHECK_TIMEZONE, so the
+      # CEST/CET switch is handled automatically.
+      - key: CHECK_DAYS
+        value: Fri
+      - key: CHECK_WINDOW_START
+        value: "17:00"
+      - key: CHECK_WINDOW_END
+        value: "19:30"
+      - key: CHECK_INTERVAL_MINUTES
+        value: "30"

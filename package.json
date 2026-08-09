@@ -2,16 +2,16 @@
   "name": "kickbasebenachrichtigung",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.ts",
+  "main": "server.mts",
   "engines": {
     "node": ">=23.6"
   },
   "scripts": {
-    "start": "node --env-file-if-exists=.env index.ts",
+    "start": "node --env-file-if-exists=.env server.mts",
     "dev": "npm run start",
     "build": "tsc",
-    "test": "npm run start",
-    "check": "npm run start"
+    "test": "npm run check",
+    "check": "node --env-file-if-exists=.env index.ts"
   },
   "keywords": [],
   "author": "",

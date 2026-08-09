@@ -273,7 +273,7 @@ async function getKickbaseBudget(): Promise<number> {
  * 2. Sends an urgent push notification to the phone via ntfy.
  * @param {number} budget The current negative budget.
  */
-async function sendNtfyAlert(budget: number): Promise<void> {
+async function sendNtfyAlert(budget: number): Promise<boolean> {
   console.log(`Budget is negative! Sending alert for: ${budget / 1_000_000}M`);
 
   try {
@@ -307,15 +307,24 @@ async function sendNtfyAlert(budget: number): Promise<void> {
     }
 
     console.log(`Notification sent successfully to topic ${env("NTFY_TOPIC")}`);
+    return true;
   } catch (error) {
     console.error("Error sending notification:", error);
+    return false;
   }
 }
 
+export interface CheckResult {
+  budget: number | null;
+  alerted: boolean;
+  error: string | null;
+}
+
 /**
- * 3. Main function to run the check.
+ * 3. Main function to run the check. Never throws, so a keepalive ping always
+ * gets a response; failures come back on the `error` field instead.
  */
-export async function runCheck(): Promise<void> {
+export async function runCheck(): Promise<CheckResult> {
   const berlinTime = new Date().toLocaleString("de-DE", {
     timeZone: "Europe/Berlin",
     weekday: "long",
@@ -338,11 +347,22 @@ export async function runCheck(): Promise<void> {
       console.warn(
         `ALERT: Budget is negative (${currentBudget}). Sending notification!`
       );
-      await sendNtfyAlert(currentBudget);
-    } else {
-      console.log(`Budget is positive (${currentBudget}). No alert necessary.`);
+      const alerted = await sendNtfyAlert(currentBudget);
+      return {
+        budget: currentBudget,
+        alerted,
+        error: alerted ? null : "notification failed, see log",
+      };
     }
+
+    console.log(`Budget is positive (${currentBudget}). No alert necessary.`);
+    return { budget: currentBudget, alerted: false, error: null };
   } catch (error) {
     console.error("Fatal error during budget check:", error);
+    return {
+      budget: null,
+      alerted: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }

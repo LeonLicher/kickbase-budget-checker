@@ -1,5 +1,8 @@
-// Entry point for the Render cron job. Locally `npm start` loads .env first;
-// on Render the environment comes from the service's env vars.
+// One-shot CLI run, useful for testing: `npm run check`.
+// The deployed service uses server.mts instead.
 import { runCheck } from "./src/kickbase.mts";
 
-await runCheck();
+const result = await runCheck();
+if (result.error) {
+  process.exitCode = 1;
+}
