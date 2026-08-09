@@ -15,9 +15,10 @@
     // and npm install -D @types/node
 
     // Other Outputs
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    // Nothing is compiled: Node strips the types locally, Netlify bundles the
+    // functions with esbuild. `npm run build` is a type check only.
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,

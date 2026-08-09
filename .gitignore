@@ -16,6 +16,9 @@ yarn-error.log*
 dist/
 build/
 
+# Netlify
+.netlify/
+
 # IDE files
 .vscode/
 .idea/

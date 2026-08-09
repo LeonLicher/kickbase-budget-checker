@@ -1,0 +1,21 @@
+services:
+  - type: cron
+    name: kickbase-budget-check
+    runtime: node
+    plan: starter
+    # Render allows one schedule per cron service and always uses UTC.
+    # This is every 30 min on Friday 17:00-19:30 Berlin time (summer / CEST),
+    # ahead of the 20:30 deadline. In winter (CET) it shifts an hour earlier.
+    schedule: "0,30 15-17 * * 5"
+    buildCommand: npm ci
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Set these in the Render dashboard, they are never committed.
+      - key: KICKBASE_EMAIL
+        sync: false
+      - key: KICKBASE_PASSWORD
+        sync: false
+      - key: NTFY_TOPIC
+        sync: false
