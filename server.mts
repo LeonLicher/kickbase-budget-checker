@@ -73,7 +73,12 @@ const server = createServer((req, res) => {
   if (isForced) {
     const expected = process.env.TRIGGER_SECRET;
     if (expected && url.searchParams.get("secret") !== expected) {
-      respond(404, { error: "not found" });
+      // Deliberately explicit rather than a silent 404: this is a private tool,
+      // and "wrong password" is far more useful than "no such route".
+      respond(403, {
+        error: "wrong or missing ?secret=",
+        hint: "It must equal TRIGGER_SECRET from the Render dashboard (Environment tab), not a Kickbase token.",
+      });
       return;
     }
   }
@@ -85,6 +90,9 @@ const server = createServer((req, res) => {
         now: localNow().label,
         window: describeWindow(),
         inWindow: isInWindow(),
+        // Which topic alerts go to, so a mismatch with the phone is visible.
+        ntfyTopic: process.env.NTFY_TOPIC ?? null,
+        checkNeedsSecret: Boolean(process.env.TRIGGER_SECRET),
         lastRun: lastResult,
       });
     },
